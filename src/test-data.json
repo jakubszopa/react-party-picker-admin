@@ -1,0 +1,32 @@
+{
+   "user-data": [
+        {
+            "name": "Jakub Szopa",
+            "email": "jakubszopa21@gmail.com",
+            "password": "test1234",
+            "alcohol": "gin z tonikiem",
+            "food": "pizza",
+            "dates": [
+                {"date": "2022-07-01T23:28:56.782Z", "mode": "can-go"},
+                {"date": "2022-08-01T23:28:56.782Z", "mode": "cant-go"},
+                {"date": "2022-09-01T23:28:56.782Z", "mode": "maybe"},
+                {"date": "2022-09-03T23:28:56.782Z", "mode": "can-go"}
+
+            ]
+        },
+        {
+            "name": "Jan Kowalski",
+            "email": "jakubszopa21@gmail.com",
+            "password": "test1234",
+            "alcohol": "gin z tonikiem",
+            "food": "pizza",
+            "dates": [
+                {"date": "2022-07-03T23:28:56.782Z", "mode": "can-go"},
+                {"date": "2022-07-01T23:28:56.782Z", "mode": "can-go"},
+                {"date": "2022-08-03T23:28:56.782Z", "mode": "cant-go"},
+                {"date": "2022-08-01T23:28:56.782Z", "mode": "cant-go"},
+                {"date": "2022-09-03T23:28:56.782Z", "mode": "maybe"}
+            ]
+        }
+    ]
+}

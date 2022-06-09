@@ -1,60 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
-import { useDaysContext } from './DaysContext';
+import { useEffect, useRef } from 'react';
 
-const SingleDay = ({ day, mode, month }) => {
-  const startingWeekDay = new Date(2022, month, 1).getDay();
-  const currentDate = new Date(2022, month, day);
+const SingleDay = ({ day, month, data, showSingleDayData, maxMinScore }) => {
 
-  const [buttonMode, setButtonMode] = useState('blank');
-
-  const { addDate, remove,  dates } = useDaysContext();
   const dayRef = useRef(null);
+  const startingWeekDay = new Date(2022, month, 1).getDay();
 
-  const handleDateInput = (inputDay, inputMonth) => {
+  let score = 0;
 
-        if (dates.days.find((day) => day.date.getTime() === currentDate.getTime() && day.mode === mode)) {
-            remove(new Date(2022, inputMonth, inputDay));
-            setButtonMode(`blank ${currentDate.getTime() === (new Date(2022, 7, 8)).getTime() ? 'today' : '' }`);
-        } else {
-            addDate(new Date(2022, inputMonth, inputDay), mode);
-            setButtonMode(mode);
+  const calculateDayScore = () => {
+    if (data) {
+      for (const item of data) {
+        if (item.dateAndMode.mode === 'can-go') {
+          score = score + 2;
+        } else if (item.dateAndMode.mode === 'cant-go') {
+          score = score - 2;
+        } else if (item.dateAndMode.mode === 'maybe') {
+          score = score + 1;
         }
-
-        console.log(dates);
-  };
-
-    useEffect(() => {
-    // console.log(dates);
-    for (const day of dates.days) {
-        if (day.date.getTime() === currentDate.getTime()) {
-            if (currentDate.getTime() === (new Date(2022, 7, 8)).getTime()) {
-                setButtonMode(`today ${day.mode}`);
-            } else {
-                setButtonMode(day.mode);
-            }
-        }
+      }
     }
-
-  }, [dates]);
+  }
 
   useEffect(() => {
+    if (score > 0) {
+      dayRef.current.style.backgroundColor = `rgba(0, 150, 255, ${score/(maxMinScore.highestScore)} )`;
+    }
+
+    if (score < 0) {
+      dayRef.current.style.backgroundColor = `rgba(255, 160, 122, ${score/(maxMinScore.lowestScore)} )`;
+    }
+
     if (day === 1) {
       dayRef.current.style.gridColumn = startingWeekDay;
     }
     // console.log(currentDate);
   }, []);
 
-  return (
-    <button
-      className={`day ${buttonMode}`}
-      ref={dayRef}
-      onClick={() => {
-        handleDateInput(day, month);
-      }}
-    >
-      {day}
-    </button>
-  );
+  calculateDayScore();
+
+  return <button ref={dayRef} onClick={() => {showSingleDayData(data)}} className='day'>{day}</button>;
 };
 
 export default SingleDay;

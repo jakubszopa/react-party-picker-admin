@@ -2,85 +2,96 @@ import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 import SingleMonth from './SingleMonth';
-import { AppProvider } from './DaysContext';
+import testData from './test-data.json';
+
+const initialState = testData['user-data'];
 
 function App() {
-  const [calendarMode, setCalendarMode] = useState('can-go');
-  const [date, setDate] = useState({ totalDates: new Date() });
 
-  const todayDate = new Date();
+  const [singleDayData, setSingleDayData] = useState([]);
+  const [singleDayDataIsShown, setSingleDayDataIsShown] = useState(false);
 
-  const dateFormatedToString = (dateValue) => {
-    return dateValue.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const singleDay = testData['user-data'][0].dates[0];
 
-  const checkingDate = new Date(2022, 5, 0);
+  const allDates = testData['user-data'].reduce((dates, currentUser) => {
+    for ( const date of currentUser.dates ) {
+      dates.push({date});
+    }
+    return dates
+  }, []);
 
-  // useEffect(() => {
-  //   console.log(dateFormatedToString(todayDate));
-  //   console.log(checkingDate);
-  // },[])
+  const allDaysScores = allDates.reduce((singleDayScore, currDate) => {
 
-  const handleCalendarModeChange = (mode) => {
-    console.log(mode);
-    setCalendarMode(mode);
+    let dateScore = 0;
+
+    if (currDate.date.mode === 'can-go') {
+      dateScore = dateScore + 2;
+    } else if (currDate.date.mode === 'cant-go') {
+      dateScore = dateScore - 2;
+    } else if (currDate.date.mode === 'maybe') {
+      dateScore = dateScore + 1;
+    }
+
+    const dayName = currDate.date.date;
+
+    if (singleDayScore[`${dayName}`]) {
+      singleDayScore[`${dayName}`] = singleDayScore[`${dayName}`] + dateScore;
+    } else {
+      singleDayScore[`${dayName}`] = dateScore;
+    }
+
+    return singleDayScore
+  }, {});
+
+  const highestScore = Math.max(...(Object.values(allDaysScores)));
+  const lowestScore = Math.min(...(Object.values(allDaysScores)));
+
+  const showSingleDayData = (data) => {
+    if (data.length > 0) {
+      setSingleDayData(data);
+      setSingleDayDataIsShown(true);
+    } else {
+      setSingleDayDataIsShown(false);
+    }
   };
 
   return (
-    <AppProvider>
-      <article className='calendar-container'>
-        <div className='calendar-flex'>
-          <p className='calendar-desc'>
-            Siema! Zaznacz daty które Tobie pasują i te w króre nie jesteś w
-            stanie przyjechać. Po analizie wszystkich danych wybiorę najlepszy
-            termin, żeby każdy mógł przyjść.
-          </p>
-          <div className='calendar'>
-            <SingleMonth month={6} calendarMode={calendarMode} />
-            <SingleMonth month={7} calendarMode={calendarMode} />
-            <SingleMonth month={8} calendarMode={calendarMode} />
-          </div>
-          <div className='legend-container'>
-            <ul className='legend'>
-              <li>
-                <div className='color can-go'></div>Mogę na 90% / 100%
-              </li>
-              <li>
-                <div className='color cant-go'></div>Może będę mógł/mogła (50%)
-              </li>
-              <li>
-                <div className='color maybe'></div>Na pewno nie mogę
-              </li>
-              <li>
-                <div className='color grey'></div>Nie mam pojęcia (zbyt odległa
-                data etc.)
-              </li>
-            </ul>
-            <div className='input-data'>
-              <label htmlFor='calendar-mode'>Zmień opcje</label>
-              <select className='calendar-dropdown'
-                name='calendar-mode'
-                id='calendar-mode'
-                onChange={(e) => {
-                  handleCalendarModeChange(e.target.value);
-                }}
-              >
-                <option defaultValue='selected' value='can-go'>
-                  Mogę na 90% / 100%
-                </option>
-                <option value='maybe'>Może będę mógł/mogła (50%)</option>
-                <option value='cant-go'>Na pewno nie mogę</option>
-              </select>
-            </div>
-          </div>
+    <article className='calendar-container'>
+      <div className='calendar-flex'>
+        <div className='calendar'>
+          <SingleMonth
+            month={6}
+            testData={testData}
+            maxMinScore={{highestScore, lowestScore}}
+            showSingleDayData={showSingleDayData}
+          />
+          <SingleMonth
+            month={7}
+            testData={testData}
+            maxMinScore={{highestScore, lowestScore}}
+            showSingleDayData={showSingleDayData}
+          />
+          <SingleMonth
+            month={8}
+            testData={testData}
+            maxMinScore={{highestScore, lowestScore}}
+            showSingleDayData={showSingleDayData}
+          />
         </div>
-      </article>
-    </AppProvider>
+        <div className='single-day-data'>
+          {singleDayDataIsShown && <h4>{(new Date(singleDayData[0].dateAndMode.date)).toLocaleString('pl', {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}</h4> }
+          {singleDayDataIsShown &&
+            singleDayData.map((item) => {
+              return (
+                <div className='single-user' key={item.user}>
+                  <div className={`color ${item.dateAndMode.mode}`}></div>{' '}
+                  {item.user} {`${item.dateAndMode.mode === 'can-go' ? 'może' : ''} ${item.dateAndMode.mode === 'cant-go' ? 'nie może' : ''} ${item.dateAndMode.mode === 'maybe' ? 'możliwe że będzie mógł/mogła' : ''} przyjść`}
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    </article>
   );
 }
 
